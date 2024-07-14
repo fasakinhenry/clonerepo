@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "CLI tool to clone a repository and push to personal GitHub profile",
   "main": "src/index.js",
+  "type": "module",
   "bin": {
     "clonerepo": "bin/cloneme.js"
   },

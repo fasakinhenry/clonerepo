@@ -30,6 +30,7 @@
     "@octokit/rest": "^21.0.0",
     "axios": "^1.7.2",
     "commander": "^12.1.0",
+    "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "open": "^10.1.0",
     "simple-git": "^3.25.0"

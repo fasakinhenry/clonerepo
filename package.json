@@ -7,6 +7,7 @@
     "clonerepo": "bin/cloneme.js"
   },
   "scripts": {
+    "start": "node bin/cloneme.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

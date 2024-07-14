@@ -3,5 +3,8 @@
     "@octokit/rest": "^21.0.0",
     "commander": "^12.1.0",
     "simple-git": "^3.25.0"
+  },
+  "bin": {
+    "clonerepo": "./bin/clonerepo.js"
   }
 }

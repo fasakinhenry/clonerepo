@@ -1,7 +1,6 @@
-const simpleGit = require('simple-git');
-const { Octokit } = require('@octokit/rest');
-const path = require('path');
-const fs = require('fs');
+import simpleGit from 'simple-git';
+import { Octokit } from '@octokit/rest';
+import path from 'path';
 
 const cloneAndPush = async (repoUrl, username, token) => {
   const git = simpleGit();
@@ -31,4 +30,4 @@ const cloneAndPush = async (repoUrl, username, token) => {
   }
 };
 
-module.exports = { cloneAndPush };
+export { cloneAndPush };

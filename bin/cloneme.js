@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 
-const { program } = require('commander');
-const { cloneAndPush } = require('../src/index');
-const open = require('open');
-const axios = require('axios');
-require('dotenv').config();
+import { program } from 'commander';
+import open from 'open';
+import axios from 'axios';
+import dotenv from 'dotenv';
+import { cloneAndPush } from '../src/index.js';
+
+dotenv.config();
 
 const CLIENT_ID = process.env.GITHUB_CLIENT_ID;
 const CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
@@ -36,7 +38,7 @@ program
       console.log('Using provided token for authentication...');
     }
 
-    cloneAndPush(repoUrl, username, githubToken);
+    await cloneAndPush(repoUrl, username, githubToken);
   });
 
 program.parse(process.argv);

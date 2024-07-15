@@ -22,9 +22,29 @@ const cloneRepository = async (git, repoUrl, retryCount = 3) => {
 };
 
 const rewriteCommitHistory = async (repoGit) => {
-  await repoGit.reset('hard', ['HEAD~1']); // Reset to the previous commit
+  // Ensure the branch is up-to-date and reset
+  await repoGit.fetch(); // Fetch latest changes
+  await repoGit.reset('hard', 'origin/main'); // Reset to remote state
   await repoGit.add('./*'); // Add all files
   await repoGit.commit('Initial commit'); // Create a new commit
+};
+
+const cleanupDirectory = async (directoryPath) => {
+  try {
+    // Check if the directory exists before trying to delete
+    if (fs.existsSync(directoryPath)) {
+      // Wait a bit before removing the directory
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Remove the directory
+      await fs.remove(directoryPath);
+      console.log(`Deleted local repository folder ${directoryPath}`);
+    } else {
+      console.log(`Directory ${directoryPath} does not exist.`);
+    }
+  } catch (error) {
+    console.error(`Error deleting local repository folder: ${error.message}`);
+  }
 };
 
 const cloneAndPush = async (repoUrl, username, token) => {
@@ -68,6 +88,7 @@ const cloneAndPush = async (repoUrl, username, token) => {
 
     // Rewrite commit history if user chooses to do so
     if (answers.commitHistory === 'Rewrite to a single "Initial commit"') {
+      console.log('Rewriting commit history...');
       await rewriteCommitHistory(repoGit);
       console.log('Commit history rewritten to a single "Initial commit".');
     } else {
@@ -85,16 +106,41 @@ const cloneAndPush = async (repoUrl, username, token) => {
     const newRepoUrl = response.data.clone_url;
     console.log(`New repository created at ${newRepoUrl}`);
 
-    // Update remote URL to include the token for authentication
-    const remoteUrl = `https://${username}:${token}@github.com/${username}/${repoName}.git`;
+    // Set the remote origin to the new repository
     console.log('Setting remote origin to the new repository...');
-    await repoGit.remote(['set-url', 'origin', remoteUrl]);
+    const remotes = await repoGit.getRemotes();
+    if (remotes.find((remote) => remote.name === 'origin')) {
+      await repoGit.remote(['set-url', 'origin', newRepoUrl]);
+    } else {
+      await repoGit.addRemote('origin', newRepoUrl);
+    }
     console.log('Remote origin set.');
 
     // Push to the new repository
     console.log('Pushing to the new repository...');
     await repoGit.push(['-u', 'origin', 'main']);
     console.log(`Repository successfully cloned and pushed to ${newRepoUrl}`);
+
+    // Ask user if they want to clean up the local repository
+    const cleanupAnswer = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'cleanup',
+        message: 'Do you want to delete the local repository folder?',
+        default: false,
+      },
+    ]);
+
+    // Perform cleanup if user chooses to do so
+    if (cleanupAnswer.cleanup) {
+      const parentDir = path.resolve('..'); // Get the parent directory
+      const localRepoPath = path.join(parentDir, repoName);
+
+      // Call cleanupDirectory to handle the cleanup
+      await cleanupDirectory(localRepoPath);
+    } else {
+      console.log('Local repository folder kept.');
+    }
   } catch (error) {
     console.error('Error:', error.message);
   }
